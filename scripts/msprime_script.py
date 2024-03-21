@@ -1,10 +1,11 @@
 # Simulation of Michael Jardine cage sequencing experiment. Reuter lab 2021
-import msprime, tskit, time
+import msprime, tskit, time, json
 import matplotlib.pyplot as plt
 import numpy as np
 from random import randint
 
 # Population parameters (note these might have to be lower if running from local machine)
+# Set reference sequence to use for the simulation
 pop_size = 5000; seq_length = 32079331; sample_size = 90
 demography = msprime.Demography()
 
@@ -21,13 +22,14 @@ demography.add_population(name='Sone_Lnine_four', initial_size=500)
 demography.add_population(name='Sone_Lnine_five', initial_size=500)
 
 # Specify parameters for ancestral model
-mut_model = msprime.JC69()
+anc_model = msprime.AncestryModel(duration=56)
+mut_model = msprime.BinaryMutationModel(state_independent=True)
 
 # Begin with the simulation of the ancestry for tree sequence
 ts = msprime.sim_ancestry(
-    samples=sample_size,
+    model=anc_model, samples=sample_size,
     population_size=pop_size, sequence_length=seq_length,
-    recombination_rate=1.71642e-08, random_seed=12345
+    recombination_rate=1.71642e-08, random_seed=12345,
 )
 
 # Add mutations
@@ -65,7 +67,14 @@ for v in mts.variants():
     if v.site.id >= 5:
         print('...')
         break
-print('First 5 tree genotypes available')
+print('First 5 tree genotypes available above')
+
+# AF calculation per mutation site
+for var in mts.variants():
+    print(f'Genomic position: {int(var.position)}')
+    if var.index >= 5:
+        break
+
 print('Creating MRCA image...')
 
 #  Display time to MRCA as graph image
@@ -73,7 +82,7 @@ kb = [0]  # Starting genomic position
 mrca_time = []
 for tree in ts.trees():
     kb.append(tree.interval.right/1000)
-    mrca = ts.node(tree.root)
+    mrca = ts.node(tree.roots)
     mrca_time.append(mrca.time)
 plt.stairs(mrca_time, kb, baseline=None)
 plt.xlabel("Genome position (kb)")
@@ -85,6 +94,6 @@ print('Creating image.svg file')
 # Output 0-5208 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational time
 f = open('image.svg', 'w')
 simple_ts = ts.simplify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-image = simple_ts.draw_svg(x_lim=(0, 5208))
+image = simple_ts.draw_svg(x_lim=(0, 10000))
 print(image, file=f)
 print('Process complete')
