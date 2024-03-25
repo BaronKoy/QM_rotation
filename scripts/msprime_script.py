@@ -5,11 +5,10 @@ import numpy as np
 from random import randint
 
 # Population parameters (note these might have to be lower if running from local machine)
-# Set reference sequence to use for the simulation
-pop_size = 5000; seq_length = 32079331; sample_size = 90
+pop_size = 5000; seq_length = 32079331; sample_size = 90 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
 demography = msprime.Demography()
 
-# Set parameters from cage populations
+# Simulate parameters from cage populations. Note admixture between all populations occurs
 demography.add_population(name='Snine_Lone_one', initial_size=500)
 demography.add_population(name='Snine_Lone_two', initial_size=500)
 demography.add_population(name='Snine_Lone_three', initial_size=500)
@@ -21,23 +20,24 @@ demography.add_population(name='Sone_Lnine_three', initial_size=500)
 demography.add_population(name='Sone_Lnine_four', initial_size=500)
 demography.add_population(name='Sone_Lnine_five', initial_size=500)
 
-# Specify parameters for ancestral model
-anc_model = msprime.AncestryModel(duration=56)
+# Specify parameters for ancestral model & mutation models
+# "duration" can be specified to msprime.StandardCoalescent object if generation time should be included in simulation
+anc_model = msprime.StandardCoalescent()
 mut_model = msprime.BinaryMutationModel(state_independent=True)
 
-# Begin with the simulation of the ancestry for tree sequence
+# Ancestry simulation. Recombination rate for 3R retrieved from: https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
 ts = msprime.sim_ancestry(
     model=anc_model, samples=sample_size,
     population_size=pop_size, sequence_length=seq_length,
-    recombination_rate=1.71642e-08, random_seed=12345,
+    recombination_rate=1.71642e-08, random_seed=12345 #random seed point
 )
 
-# Add mutations
+# Add mutations. Mutation rate for 3R retrieved from: https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
 mts = msprime.sim_mutations(ts, rate=5.49e-09,
-    random_seed=54321, model=mut_model
+    random_seed=54321, model=mut_model # random seed point
 )
 
-# Parameters count check
+# Tree & external nodes count check 
 print('Number of Trees:', mts.num_trees); print('Number of mutations:', mts.num_mutations)
 print('Number of external nodes:', mts.num_samples); print('Number of samples:', mts.num_individuals)
 
@@ -60,24 +60,31 @@ else:
     print(f"All {ts.num_trees} trees coalesced")
     print(f"Completed in {elapsed:.6g} secs")
 
-# Display genotypes for external nodes
+# Check & display genotypes for the first 5 external nodes
+print('Generating genotypes for the first 5 external nodes...')
+print('0-5 site genotypes:')
 np.set_printoptions(linewidth=200)
 for v in mts.variants():
+    alleles = np.array(v.position)
     print(f'Site {v.site.id}: {v.genotypes}')
     if v.site.id >= 5:
         print('...')
         break
-print('First 5 tree genotypes available above')
 
 # AF calculation per mutation site
+allele_file = open('AF_count.txt', 'w')
 for var in mts.variants():
-    print(f'Genomic position: {int(var.position)}')
-    if var.index >= 5:
-        break
+    locat = int(var.position)
+    af = np.array(var.genotypes)
+    af_count = np.count_nonzero(af == 0)    
+    print(f'Genomic_position: {locat} ref_count: {af_count}', file=allele_file)
+    '''if var.index >= 5:
+        break''' # Include to save script having to go through all mutations!
 
+# The next block of code creates a MRCA graph image
+# TODO - Current error in which graph can not be generated
+'''
 print('Creating MRCA image...')
-
-#  Display time to MRCA as graph image
 kb = [0]  # Starting genomic position
 mrca_time = []
 for tree in ts.trees():
@@ -90,10 +97,16 @@ plt.ylabel("Time of root (or MRCA) in generations")
 plt.yscale("log")
 plt.show()
 print('Creating image.svg file')
+'''
 
-# Output 0-5208 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational time
+print('Creating simple svg image...')
+# Output 0-5000 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational time
 f = open('image.svg', 'w')
 simple_ts = ts.simplify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-image = simple_ts.draw_svg(x_lim=(0, 10000))
+image = simple_ts.draw_svg(y_axis=True, x_lim=(0, 5000))
 print(image, file=f)
+print('image.svg successfully created')
 print('Process complete')
+
+# Create output file for SLiM input
+ts.dump('msprime_tree_sequence.trees')

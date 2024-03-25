@@ -1,0 +1,5 @@
+Genomic_position:       8395213 ref_count:      18
+Genomic_position:       12276065        ref_count:      18
+Genomic_position:       12621094        ref_count:      18
+Genomic_position:       18157825        ref_count:      18
+Genomic_position:       26647327        ref_count:      18
