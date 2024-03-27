@@ -5,7 +5,7 @@ import numpy as np
 from random import randint
 
 # Population parameters (note these might have to be lower if running from local machine)
-pop_size = 5000; seq_length = 32079331; sample_size = 90 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
+pop_size = 5000; seq_length = 32079331; sample_size = 4320 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
 demography = msprime.Demography()
 
 # Simulate parameters from cage populations. Note admixture between all populations occurs
@@ -29,12 +29,12 @@ mut_model = msprime.BinaryMutationModel(state_independent=True)
 ts = msprime.sim_ancestry(
     model=anc_model, samples=sample_size,
     population_size=pop_size, sequence_length=seq_length,
-    recombination_rate=1.71642e-08, random_seed=12345 #random seed point
+    recombination_rate=1.71642e-08, random_seed=1234 #random seed point
 )
 
 # Add mutations. Mutation rate for 3R retrieved from: https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
 mts = msprime.sim_mutations(ts, rate=5.49e-09,
-    random_seed=54321, model=mut_model # random seed point
+    random_seed=4321, model=mut_model # random seed point
 )
 
 # Tree & external nodes count check 
@@ -42,22 +42,22 @@ print('Number of Trees:', mts.num_trees); print('Number of mutations:', mts.num_
 print('Number of external nodes:', mts.num_samples); print('Number of samples:', mts.num_individuals)
 
 # Tree count
-for tree in ts.trees():
+for tree in mts.trees():
     print(f'Tree {tree.index} covers {tree.interval}')
     if tree.index >= 5:
         print('...')
         break
-print(f"Tree {ts.last().index} covers {ts.last().interval}") # Jump to last tree
+print(f"Tree {mts.last().index} covers {mts.last().interval}") # Jump to last tree
 
 # Processing time calculation
 elapsed = time.time()
-for tree in ts.trees():
+for tree in mts.trees():
     if tree.has_multiple_roots:
         print("Tree {tree.index} has not coalesced")
         break
 else:
     elapsed = time.time() - elapsed
-    print(f"All {ts.num_trees} trees coalesced")
+    print(f"All {mts.num_trees} trees coalesced")
     print(f"Completed in {elapsed:.6g} secs")
 
 # Check & display genotypes for the first 5 external nodes
@@ -100,13 +100,13 @@ print('Creating image.svg file')
 '''
 
 print('Creating simple svg image...')
-# Output 0-5000 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational time
+# Output 0-10000 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational time
 f = open('image.svg', 'w')
-simple_ts = ts.simplify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-image = simple_ts.draw_svg(y_axis=True, x_lim=(0, 5000))
+simple_mts = mts.simplify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+image = simple_mts.draw_svg(y_axis=True, x_lim=(0, 10000))
 print(image, file=f)
 print('image.svg successfully created')
 print('Process complete')
 
 # Create output file for SLiM input
-ts.dump('msprime_tree_sequence.trees')
+mts.dump('msprime_tree_sequence.trees')
