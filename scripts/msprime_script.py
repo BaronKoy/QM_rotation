@@ -1,14 +1,15 @@
 # Simulation of Michael Jardine cage sequencing experiment. Reuter lab 2021
-import msprime, tskit, time, json
+import msprime, tskit, time, json, sys
 import matplotlib.pyplot as plt
 import numpy as np
 from random import randint
 
 # Population parameters (note these might have to be lower if running from local machine)
-pop_size = 5000; seq_length = 32079331; sample_size = 4320 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
-demography = msprime.Demography()
+pop_size = 5000; seq_length = 32079331; sample_size = 5000 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
 
-# Simulate parameters from cage populations. Note admixture between all populations occurs
+# Use block code to simulate cage populations
+# NOTE current simulations runs on a single population of Ne = 5000
+'''demography = msprime.Demography()
 demography.add_population(name='Snine_Lone_one', initial_size=500)
 demography.add_population(name='Snine_Lone_two', initial_size=500)
 demography.add_population(name='Snine_Lone_three', initial_size=500)
@@ -18,23 +19,26 @@ demography.add_population(name='Sone_Lnine_one', initial_size=500)
 demography.add_population(name='Sone_Lnine_two', initial_size=500)
 demography.add_population(name='Sone_Lnine_three', initial_size=500)
 demography.add_population(name='Sone_Lnine_four', initial_size=500)
-demography.add_population(name='Sone_Lnine_five', initial_size=500)
+demography.add_population(name='Sone_Lnine_five', initial_size=500)'''
 
-# Specify parameters for ancestral model & mutation models
+# Assign ancestral & mutation models
+# Assign seed values - TODO random for every simulation run
 # "duration" can be specified to msprime.StandardCoalescent object if generation time should be included in simulation
 anc_model = msprime.StandardCoalescent()
 mut_model = msprime.BinaryMutationModel(state_independent=True)
+ancestry_seed = 1
+mutation_seed = 101
 
 # Ancestry simulation. Recombination rate for 3R retrieved from: https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
 ts = msprime.sim_ancestry(
     model=anc_model, samples=sample_size,
     population_size=pop_size, sequence_length=seq_length,
-    recombination_rate=1.71642e-08, random_seed=1234 #random seed point
+    recombination_rate=1.71642e-08, random_seed=ancestry_seed #random seed point
 )
 
 # Add mutations. Mutation rate for 3R retrieved from: https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
 mts = msprime.sim_mutations(ts, rate=5.49e-09,
-    random_seed=4321, model=mut_model # random seed point
+    random_seed=mutation_seed, model=mut_model # random seed point
 )
 
 # Tree & external nodes count check 
@@ -72,12 +76,16 @@ for v in mts.variants():
         break
 
 # AF calculation per mutation site
-allele_file = open('AF_count.txt', 'w')
+complete_file = open('All_mut.csv', 'w')
+allele_file = open('SLiM_AF_count.csv', 'w')
 for var in mts.variants():
     locat = int(var.position)
     af = np.array(var.genotypes)
-    af_count = np.count_nonzero(af == 0)    
-    print(f'Genomic_position: {locat} ref_count: {af_count}', file=allele_file)
+    af_count = np.count_nonzero(af == 0)
+    af_per = (af_count/100)
+    if 5 <= af_per <= 15 or 85 <= af_per <= 95:
+        print(f'{locat},{af_per}', file=allele_file)
+    print(f'{locat},{af_per}', file=complete_file)
     '''if var.index >= 5:
         break''' # Include to save script having to go through all mutations!
 
@@ -109,4 +117,8 @@ print('image.svg successfully created')
 print('Process complete')
 
 # Create output file for SLiM input
-mts.dump('msprime_tree_sequence.trees')
+mts.dump('msprime_tree_sequence.trees'); print('.trees file created')
+
+# Create vcf output file
+vcf_file = open('msprime_out.vcf', 'w')
+create_vcf = mts.write_vcf(output=vcf_file); print('.vcf created')
