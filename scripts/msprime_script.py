@@ -85,6 +85,7 @@ for var in mts.variants():
     af_per = (af_count/100)
     if 5 <= af_per <= 15 or 85 <= af_per <= 95:
         print(f'{locat},{af_per}', file=allele_file)
+    print('Position,Ref_allele', file=complete_file)
     print(f'{locat},{af_per}', file=complete_file)
     '''if var.index >= 5:
         break''' # Include to save script having to go through all mutations!
