@@ -4,7 +4,7 @@ library(ggplot2)
 options(scipen = 999) # prevent scientific notation for genomic position on x axis
 
 # Read in output from msprime simulation
-all_mut <- read_csv("Documents/rotation_2/QM_rotation/scripts/All_mut.csv", 
+all_mut <- read_csv("Documents/rotation_2/QM_rotation/scripts/All_mut_2.csv", 
                      col_types = cols(Position = col_number(), 
                                       Ref_allele = col_number()))
 # Include line below to view mutations table
@@ -13,7 +13,7 @@ all_mut <- read_csv("Documents/rotation_2/QM_rotation/scripts/All_mut.csv",
 # ggplot genomic position vs reference allele count
 initial_plot <- ggplot(all_mut, aes(x = Position, y = Ref_allele)) + 
   geom_point(shape = 19, size = 2, color = 'deepskyblue3') +
-  labs(title = 'Allele frequency of alternate allele across chromosome arm 3R', subtitle = '10 simulations',
+  labs(title = 'Alternate allele frequency across chromosome arm 3R', subtitle = '10 simulations',
        y = 'Alternate allele(1) %',
        x = 'Genomic position (Chromosome 3R)') +
   # Intercept lines for 5, 15, 85, & 95%
