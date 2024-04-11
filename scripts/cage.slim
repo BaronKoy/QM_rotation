@@ -1,34 +1,40 @@
 // Forward WF model simulation of Cage Experiments from Reuter lab 2021
-
 // Simulate Drosophila chr3R. Overdominance. Recombination&mutation rates from https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_DroMel
+
+// -----Wright-Fisher model paramters-----
+
 initialize()
-{
+{	
+	// Assign model type as standard Wright-Fisher 
+	initializeSLiMModelType('WF');
+	initializeTreeSeq();		
 	// Mutation rate of chromosome 3R
 	initializeMutationRate(5.49e-09);
-	
 	// m1 mutation type: neutral - overdominance should be used to simulate the effects of balancing selection!
-	initializeMutationType("m1", 1.0, "f", 0.0); // heterozygous overdominance - positive balancing selection
-	
+	initializeMutationType("m1", 1.5, "f", 0.5); // heterozygous overdominance - positive balancing selection
 	// This next section will have to be changed depending on what type of mutations I will be adding and what type of chromosomal regions will be added
 	// g1 genomic element type: uses m1 for all mutations. Weight of 1.0. Named g1
 	initializeGenomicElementType("g1", m1, 1.0);
-	
 	// uniform chromosome 3R of length 32079331 bp
-	initializeGenomicElement(g1, 0, 32079331);
-	
-	// Uniform recombination rate from 
+	initializeGenomicElement(g1, 0, 32079330);
+	// Uniform recombination rate from
 	initializeRecombinationRate(1.71642e-08);
 }
 
-// Create 10 subpopulations consisting of 500 flies each with no migration/admixture
-1 early() 
+// -----Population structure-----
+
+// Input tree file from msprime neutral burn-in simulation
+1 late()
 {
-	subpopCount = 9;
-	for (i in 0:subpopCount)
-		sim.addSubpop(i, 500);
+	sim.readFromPopulationFile('/home/baron/Documents/rotation_2/QM_rotation/scripts/msprime_tree_sequence_2.trees'); // Create p0 5000 flies population
+	subpopCount = 10;
+	for (i in 1:subpopCount)
+		sim.addSubpopSplit(i, 500, p0); // Create 10 subpopulations with 500 flies each from p0/5000 input population with no migration/admixture between subpops
 }
 
-// Output samples of 480 genomes across all 10 populations at 2, 4, 8, 12, 20, 28, 36, 44, 56 genrations
+// -----Final output and finish-----
+
+// Output samples of 48 genomes across all 10 populations at 2, 4, 8, 12, 20, 28, 36, 44, 56 generations
 2 late() {sim.subpopulations.outputSample(48);}
 4 late() {sim.subpopulations.outputSample(48);}
 8 late() {sim.subpopulations.outputSample(48);}
@@ -38,9 +44,8 @@ initialize()
 36 late() {sim.subpopulations.outputSample(48);}
 44 late() {sim.subpopulations.outputSample(48);}
 56 late() {sim.subpopulations.outputSample(48);}
-
 // Output final mutation rates & complete simulation
-10000 late()
+56 late()
 {
 	sim.outputFixedMutations();
 	sim.simulationFinished();
