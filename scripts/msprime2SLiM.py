@@ -3,6 +3,7 @@
 import msprime, tskit, time, json, sys, random, pyslim
 import matplotlib.pyplot as plt
 import numpy as np
+from IPython.display import display
 
 # Population, sampling, & sequence parameters
 pop_size = 5000; seq_length = 32079331; sample_size = 5000 # Based on Michael Jardine cage experiments & Drosophila chromosome arm 3R
@@ -104,8 +105,8 @@ for v in mts.variants():
 
 # AF calculation per mutation site
 # Ensure this step is done to output AF values for SLiM input
-complete_file = open('All_mut_2.csv', 'a') # change this to 'a' to append new outputs if file already exists. 'w' to create new file
-allele_file = open('SLiM_AF_count_2.csv', 'a') # change this to 'a' to append new outputs if file already exists. 'w' to create new file
+complete_file = open('All_mut_2.csv', 'w') # change this to 'a' to append new outputs if file already exists. 'w' to create new file
+allele_file = open('SLiM_AF_count_2.csv', 'w') # change this to 'a' to append new outputs if file already exists. 'w' to create new file
 print('Position,Ref_allele', file=complete_file)
 print(file=allele_file)
 for var in mts.variants():
@@ -125,9 +126,9 @@ for var in mts.variants():
 print('Creating MRCA image...')
 kb = [0]  # Starting genomic position
 mrca_time = []
-for tree in ts.trees():
+for tree in mts.trees():
     kb.append(tree.interval.right/1000)
-    mrca = ts.node(tree.roots)
+    mrca = mts.node(tree.roots)
     mrca_time.append(mrca.time)
 plt.stairs(mrca_time, kb, baseline=None)
 plt.xlabel("Genome position (kb)")
@@ -139,17 +140,45 @@ print('Creating image.svg file')
 
 print('Creating simple svg image...')
 # Output 0-10000 genome region to a file (image.svg) to check trees, limit external nodes to 10 for computational load
-f = open('Image_2.svg', 'w')
+f = open('/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/Image.svg', 'w')
+svg_size = (2000, 1000)
+css_string = ('{background-color: white}')
 simple_mts = mts.simplify([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-image = simple_mts.draw_svg(y_axis=True, x_lim=(0, 10000))
+image = simple_mts.draw_svg(y_axis=True,
+    x_scale = 'treewise',
+    x_lim=(0, 10000), size = svg_size, style = css_string)
 print(image, file=f)
 print('image.svg successfully created')
 
 # Create tree output file for SLiM
-mts.dump('msprime_tree_sequence_2.trees'); print('.trees file created')
+mts.dump('msprime_tree_sequence.trees'); print('.trees file created')
 
 # Create vcf output file for SLiM
-vcf_file = open('msprime_out_2.vcf', 'a')
+vcf_file = open('msprime_out_3.vcf', 'w')
 create_vcf = mts.write_vcf(output=vcf_file); print('.vcf created')
+
+# Print end process messages
 print(f'Random seeds: Anc: {ancestry_seed}, Mut: {mutation_seed}') # Check random seed strings used
 print('Process complete')
+print(f'Max root time: {mts.max_root_time}')
+print(f'Overall Diversity (pi) = {mts.diversity(mode = "site")}')
+afs = mts.allele_frequency_spectrum(sample_sets = None, mode = 'site', polarised = True, span_normalise = False)
+print(f'Site frequency spectrum sample: {afs}')
+
+# Figure for SFS
+fig, ax = plt.subplots()
+ax.bar(np.arange(mts.num_samples + 1), afs, color = 'steelblue') # Plot sfs
+# Set labels for title & axis
+ax.set_title('Site frequency spectrum (SFS)\nSimulation_4', fontsize = '30',
+ fontweight = 'bold', ); ax.set_xlabel('Alt Allele frequency class',
+    fontsize = '20'); ax.set_ylabel('Proportion of Alt allele', fontsize = '20')
+'''NOTE the lines below limits the x&y axis' to 1000, which in result will remove any bins with frequency
+>1000, which is more than likely with this simulation. Only include to produce a cleaner plot
+which can be used to demonstrate exponential distribution
+which is expected with neutral model simulation'''
+ax.set_xlim([0, 1000]) # limit x axis to 1000
+ax.set_ylim([0, 1000]) # limit y axis to 1000
+plt.savefig('/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SFS_4.png', 
+    dpi = 1000, format = 'png',
+    bbox_inches = 'tight')
+plt.show()
