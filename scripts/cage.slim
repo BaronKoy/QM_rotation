@@ -4,20 +4,25 @@
 // -----Wright-Fisher model paramters-----
 
 initialize()
-{	
-	// Assign model type as standard Wright-Fisher 
+{
+	// Assign model type as standard Wright-Fisher
 	initializeSLiMModelType('WF');
-	initializeTreeSeq();		
-	// Mutation rate of chromosome 3R
-	initializeMutationRate(5.49e-09);
-	// m1 mutation type: neutral - overdominance should be used to simulate the effects of balancing selection!
-	initializeMutationType("m1", 1.5, "f", 0.5); // heterozygous overdominance - positive balancing selection
-	// This next section will have to be changed depending on what type of mutations I will be adding and what type of chromosomal regions will be added
+	initializeTreeSeq();
+	// No new mutations
+	initializeMutationRate(0);
+	
+	// m1 mutation type: neutral - heterozygous overdominance can be used to simulate the effects of balancing selection - positive balancing selection
+	// Define constants for dominance and selection coefficients
+	defineConstant('Sco', runif(1, 0, 0.5));
+	defineConstant('Dco', runif(1, 1, 5));
+	initializeMutationType("m1", Dco, "f", Sco); 
+	
 	// g1 genomic element type: uses m1 for all mutations. Weight of 1.0. Named g1
 	initializeGenomicElementType("g1", m1, 1.0);
-	// uniform chromosome 3R of length 32079331 bp
+	// uniform chromosome 3R of length 32079331 bp (0 indexing)
 	initializeGenomicElement(g1, 0, 32079330);
-	// Uniform recombination rate from
+	
+	// Uniform recombination rate
 	initializeRecombinationRate(1.71642e-08);
 }
 
@@ -26,27 +31,68 @@ initialize()
 // Input tree file from msprime neutral burn-in simulation
 1 late()
 {
-	sim.readFromPopulationFile('/home/baron/Documents/rotation_2/QM_rotation/scripts/msprime_tree_sequence_2.trees'); // Create p0 5000 flies population
+	sim.readFromPopulationFile('/home/baron/Documents/rotation_2/QM_rotation/scripts/msprime_tree_sequence.trees'); // Create p0 5000 flies population
+	// Observation of starting AF's in next line
+	sim.subpopulations.outputSample(10000, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/genstart.txt'); 
 	subpopCount = 10;
 	for (i in 1:subpopCount)
 		sim.addSubpopSplit(i, 500, p0); // Create 10 subpopulations with 500 flies each from p0/5000 input population with no migration/admixture between subpops
 }
 
-// -----Final output and finish-----
+// -----Sampling-----
 
-// Output samples of 48 genomes across all 10 populations at 2, 4, 8, 12, 20, 28, 36, 44, 56 generations
-2 late() {sim.subpopulations.outputSample(48);}
-4 late() {sim.subpopulations.outputSample(48);}
-8 late() {sim.subpopulations.outputSample(48);}
-12 late() {sim.subpopulations.outputSample(48);}
-20 late() {sim.subpopulations.outputSample(48);}
-28 late() {sim.subpopulations.outputSample(48);}
-36 late() {sim.subpopulations.outputSample(48);}
-44 late() {sim.subpopulations.outputSample(48);}
-56 late() {sim.subpopulations.outputSample(48);}
+// Output samples of 48 genomes across all 10 subpopulations at 2, 4, 8, 12, 20, 28, 36, 44, 56 generations
+2 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen2.txt', append = T);
+}
+4 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen4.txt', append = T);
+}
+8 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen8.txt', append = T);
+}
+12 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen12.txt', append = T);
+}
+20 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen20.txt', append = T);
+}
+28 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen28.txt', append = T);
+}
+36 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen36.txt', append = T);
+}
+44 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen44.txt', append = T);
+}
+56 late() {
+subpop = 10;
+for (x in 1:subpop)
+	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen56.txt', append = T);
+}
+
+// -----Complete simulation-----
+
 // Output final mutation rates & complete simulation
 56 late()
 {
-	sim.outputFixedMutations();
+	sim.treeSeqOutput('/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_output.trees'); // For input into PySLiM
 	sim.simulationFinished();
 }
