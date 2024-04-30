@@ -15,15 +15,24 @@ initialize()
 	// Define constants for dominance and selection coefficients
 	defineConstant('Sco', runif(1, 0, 0.5));
 	defineConstant('Dco', runif(1, 1, 5));
-	initializeMutationType("m1", Dco, "f", Sco); 
+	initializeMutationType("m1", Dco, 'f', Sco);
+	initializeMutationType('m2', 1, 'f', 0.5);
 	
 	// g1 genomic element type: uses m1 for all mutations. Weight of 1.0. Named g1
-	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElementType('g1', m1, 1.0);
+	initializeGenomicElementType('g2', m2, 1.0);
+	initializeGenomicElementType('g3', m1, 1.0);
 	// uniform chromosome 3R of length 32079331 bp (0 indexing)
-	initializeGenomicElement(g1, 0, 32079330);
+	initializeGenomicElement(g1, 0, 18414272);
+	initializeGenomicElement(g2, 18414273, 18545586);
+	initializeGenomicElement(g3, 18545587, 32079330);
 	
 	// Uniform recombination rate
 	initializeRecombinationRate(1.71642e-08);
+	
+	// Retain fixed alleles in output file
+	m1.convertToSubstitution = F;
+	m2.convertToSubstitution = F;
 }
 
 // -----Population structure-----
@@ -32,59 +41,64 @@ initialize()
 1 late()
 {
 	sim.readFromPopulationFile('/home/baron/Documents/rotation_2/QM_rotation/scripts/msprime_tree_sequence.trees'); // Create p0 5000 flies population
-	// Observation of starting AF's in next line
-	sim.subpopulations.outputSample(10000, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/genstart.txt'); 
-	subpopCount = 10;
-	for (i in 1:subpopCount)
-		sim.addSubpopSplit(i, 500, p0); // Create 10 subpopulations with 500 flies each from p0/5000 input population with no migration/admixture between subpops
+	sim.addSubpopSplit(1, 2500, p0); 
+	sim.addSubpopSplit(2, 2500, p0);	
+	// Create p1 & p2 with 2500 each
+	subpopCount1 = 7;
+	subpopCount2 = 12;
+	for (i in 3:subpopCount1)
+		sim.addSubpopSplit(i, 500, p1);
+	for (j in 8:subpopCount2)
+		sim.addSubpopSplit(j, 500, p2);
+	// Create 10 subpopulations - 1-5 = 500 flies each from p1 and 6-10 = 500 each from p2
 }
 
 // -----Sampling-----
 
 // Output samples of 48 genomes across all 10 subpopulations at 2, 4, 8, 12, 20, 28, 36, 44, 56 generations
 2 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen2.txt', append = T);
 }
 4 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen4.txt', append = T);
 }
 8 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen8.txt', append = T);
 }
 12 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen12.txt', append = T);
 }
 20 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen20.txt', append = T);
 }
 28 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen28.txt', append = T);
 }
 36 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen36.txt', append = T);
 }
 44 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen44.txt', append = T);
 }
 56 late() {
-subpop = 10;
-for (x in 1:subpop)
+subpop = 12;
+for (x in 3:subpop)
 	sim.subpopulations[x].outputSample(96, filePath = '/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/gen56.txt', append = T);
 }
 
