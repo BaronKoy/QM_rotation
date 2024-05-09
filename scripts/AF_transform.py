@@ -1,4 +1,4 @@
-complete_file = open('genstart_AFs.txt', 'w')
+complete_file = open('genstart.txt', 'w')
 print('Position,AF', file = complete_file)
 with open('/home/baron/Documents/rotation_2/QM_rotation/scripts/outputs/SLiM_AFs/genstart.txt', 'r') as firstfile:
     for line in firstfile.readlines():
