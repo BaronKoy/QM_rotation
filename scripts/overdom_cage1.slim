@@ -1,0 +1,111 @@
+// set up a simple neutral simulation
+initialize() 
+{	// Nucleotide based WF model
+	initializeSLiMModelType('WF');
+	initializeSLiMOptions(nucleotideBased=T);
+	initializeAncestralNucleotides('/home/baron/Documents/rotation_2/QM_rotation/reuter/GCA_000001215.4_3R.fna');
+	
+	// m1 mutation type: overdominance
+	// m2 mutation type: neutral
+	defineConstant('Dco', runif(1, 1, 5)); // use Dco for variable value
+	defineConstant('Sco', runif(1, 0, 0.25)); // use Sco for variable value
+	initializeMutationTypeNuc("m1", 1, 'f', 0);
+	initializeMutationTypeNuc("m2", 0.5, 'f', 0);
+	
+	// g1 genomic element type: uses m1 for all mutations
+	initializeGenomicElementType("g1", c(m1, m2), c(0.0, 1.0), mmJukesCantor(5.49e-09));
+	initializeGenomicElementType('g2', c(m1, m2), c(1.0, 0.0), mmJukesCantor(5.49e-09));
+	initializeGenomicElementType('g3', c(m1, m2), c(0.0, 1.0), mmJukesCantor(5.49e-09));
+	// uniform chromosome of length 32079331 with uniform recombination
+	initializeGenomicElement(g1, 0, 18479919);
+	initializeGenomicElement(g2, 18479920, 18479921);
+	initializeGenomicElement(g3, 18479922, 32079330);
+	initializeRecombinationRate(1.71642e-08);
+	
+	// Retain fixed alleles in output file
+	m1.convertToSubstitution = F;
+	m2.convertToSubstitution = F;
+}
+
+// create a population of 500 individuals
+1 early() 
+{
+	sim.addSubpop('p1', 700);
+	p1.genomes.readFromVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/dgrp2_dm6_main_chrs_filt_kept_FB.vcf', m1));
+	sim.addSubpop('p2', 700);
+	p2.genomes.readFromVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/dgrp2_dm6_main_chrs_filt_kept_MB.vcf', m1);
+}
+
+4 early()
+{
+	p1.setSubpopulationSize(5000);
+	p2.setSubpopulationSize(5000);
+	sim.addSubpop('p3', 5000);
+	sim.addSubpop('p4', 5000);
+	p3.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+	p4.setMigrationRates(c(p1, p2), c(0.10, 0.90));
+//	p3.genomes.outputVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen1.vcf');
+//	p4.genomes.outputVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen1.vcf');
+}
+
+4 late()
+{
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p4.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	//sim.subpopulations[0].outputVCFSample(700, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/L_fixed.vcf');
+	//sim.subpopulations[1].outputVCFSample(700, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/S_fixed.vcf');
+}
+
+6 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen2.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen2.vcf');
+}
+
+8 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen4.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen4.vcf');
+}
+
+12 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen4.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen4.vcf');
+}
+
+16 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen12.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen12.vcf');
+}
+
+24 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen20.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen20.vcf');
+}
+
+32 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen28.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen28.vcf');
+}
+	
+40 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen36.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen36.vcf');
+}
+
+48 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_ge44.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen44.vcf');
+}
+
+60 late()
+{
+	sim.subpopulations[2].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/outputs/L_gen56.vcf');
+	sim.subpopulations[3].outputVCFSample(48, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/outputs/S_gen56.vcf');
+}
