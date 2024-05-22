@@ -1,0 +1,70 @@
+// set up a simple neutral simulation
+initialize() 
+{	// Nucleotide based WF model
+	initializeSLiMModelType('WF');
+	initializeSLiMOptions(nucleotideBased=T);
+	initializeAncestralNucleotides('/home/baron/Documents/rotation_2/QM_rotation/reuter/GCA_000001215.4_3R.fna');
+	
+	// m1 mutation type: overdominance
+	// m2 mutation type: neutral
+	defineConstant('Dco', runif(1, 1, 5)); // use Dco for variable value
+	defineConstant('Sco', runif(1, 0, 0.25)); // use Sco for variable value
+	initializeMutationTypeNuc("m1", 1, 'f', 0);
+	initializeMutationTypeNuc("m2", 0.5, 'f', 0);
+	
+	// g1 genomic element type: uses m1 for all mutations
+	initializeGenomicElementType("g1", c(m1, m2), c(0.0, 1.0), mmJukesCantor(5.49e-09));
+	initializeGenomicElementType('g2', c(m1, m2), c(1.0, 0.0), mmJukesCantor(5.49e-09));
+	initializeGenomicElementType('g3', c(m1, m2), c(0.0, 1.0), mmJukesCantor(5.49e-09));
+	// uniform chromosome of length 32079331 with uniform recombination
+	initializeGenomicElement(g1, 0, 18479919);
+	initializeGenomicElement(g2, 18479920, 18479921);
+	initializeGenomicElement(g3, 18479922, 32079330);
+	initializeRecombinationRate(1.71642e-08);
+	
+	// Retain fixed alleles in output file
+	m1.convertToSubstitution = F;
+	m2.convertToSubstitution = F;
+}
+
+// create a population of 500 individuals
+1 late() 
+{
+	sim.addSubpop('p1', 700);
+	p1.genomes.readFromVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/dgrp2_dm6_main_chrs_filt_kept_FB.vcf', m1);
+	sim.addSubpop('p2', 700);
+	p2.genomes.readFromVCF('/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/dgrp2_dm6_main_chrs_filt_kept_MB.vcf', m1);
+}
+
+4 early()
+{
+	p1.setSubpopulationSize(22500);
+	p2.setSubpopulationSize(22500);
+	sim.addSubpop('p3', 5000);
+	sim.addSubpop('p4', 5000);
+	sim.addSubpop('p5', 5000);
+	sim.addSubpop('p6', 5000);
+	sim.addSubpop('p7', 5000);
+	p3.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+	p4.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+	p5.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+	p6.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+	p7.setMigrationRates(c(p1, p2), c(0.90, 0.10));
+}
+
+4 late()
+{
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	//sim.subpopulations[0].outputVCFSample(700, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/L_pop/L_fixed.vcf');
+	//sim.subpopulations[1].outputVCFSample(700, filePath = '/home/baron/Documents/rotation_2/QM_rotation/reuter/vcfs/S_pop/S_fixed.vcf');
+	//subpopcount1 = 7;
+	//subpopcount2 = 12;
+	//for (x in 3:subpopcount1)
+		//sim.addSubpopSplit(x, c(4500, 500), c(p1, p2);
+	//for (y in 8:subpopcount2)
+		//sim.addSubpopSplit(y, 4500, p2);
+}
