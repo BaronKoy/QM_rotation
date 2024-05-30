@@ -1,8 +1,8 @@
-// Simulation of Cage experiment Reuter lab 2021
+// Simulation of Cage experiment Reuter lab 2021 - Part 1 (cage population construction)
 
 // -----Intialisation & parameter setup-----
 
-initialize() 
+initialize()
 {	// Nucleotide based WF model
 	initializeSLiMModelType('WF');
 	initializeSLiMOptions(nucleotideBased=T);
@@ -26,7 +26,7 @@ initialize()
 	initializeGenomicElement(g3, 18479922, 32079330);
 	initializeRecombinationRate(1.71642e-08);
 	
-	// Retain fixed alleles in output file
+	// Retain fixed alleles for output file
 	m1.convertToSubstitution = F;
 	m2.convertToSubstitution = F;
 }

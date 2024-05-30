@@ -1,4 +1,4 @@
-// Simulation of Cage experiment Reuter lab 2021 - part 2
+// Simulation of Cage experiment Reuter lab 2021 - part 2 (cage population 56 gen simulation)
 
 // -----Intialisation & parameter setup-----
 
@@ -16,9 +16,9 @@ initialize()
 	initializeMutationTypeNuc("m2", 0.5, 'f', 0); // neutral
 	
 	// Assign genomic element and weights of mutations
-	initializeGenomicElementType("g1", c(m1, m2), c(0.0, 0.0), mmJukesCantor(0.0)); // neutral
+	initializeGenomicElementType("g1", c(m1, m2), c(0.0, 1.0), mmJukesCantor(0.0)); // neutral
 	initializeGenomicElementType('g2', c(m1, m2), c(1.0, 0.0), mmJukesCantor(0.0)); // overdominance at g2 - 3R:18479921
-	initializeGenomicElementType('g3', c(m1, m2), c(0.0, 0.0), mmJukesCantor(0.0)); // neutral
+	initializeGenomicElementType('g3', c(m1, m2), c(0.0, 1.0), mmJukesCantor(0.0)); // neutral
 	
 	// Chromosome 3R length 32079331
 	initializeGenomicElement(g1, 0, 18479919);
@@ -42,45 +42,46 @@ initialize()
 
 2 late()
 {
+	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen2.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen2.trees');
 }
 
 4 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen4.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen4.trees');
 }
 
 8 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen8.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen8.trees');
 }
 
 12 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen12.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen12.trees');
 }
 
 20 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen20.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen20.trees');
 }
 
 28 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen28.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen28.trees');
 }
 
 36 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen36.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen36.trees');
 }
 
 44 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/ge44.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen44.trees');
 }
 56 late()
-{
+{	sim.subpopulations[0].outputVCFSample(48, filePath = '/data/home/bty565/simulations/outputs/L_pop/cage_1/vcfs/gen56.vcf');
 	sim.treeSeqOutput('/data/home/bty565/simulations/outputs/L_pop/cage_1/trees/L_gen56.trees');
 	sim.simulationFinished();
 }
